@@ -15,10 +15,12 @@ fn main() -> Result<()> {
     config.wasm_component_model(true);
 
     let engine = Engine::new(&config)?;
-    let component = Component::from_file(
-        &engine,
-        "/Users/donblas/Programming/comfy-hotreload/target/game.wasm",
-    )?;
+
+    let mut wasm_path = std::env::current_exe()?;
+    wasm_path.pop();
+    wasm_path.push("game.wasm");
+
+    let component = Component::from_file(&engine, wasm_path)?;
 
     let mut linker = Linker::new(&engine);
     wasmtime_wasi::add_to_linker_sync(&mut linker)?;
