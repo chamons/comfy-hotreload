@@ -1,0 +1,11 @@
+[package]
+name = "comfy-hotreload"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+game = { path = "../game" }
+
+anyhow = "1.0.86"
+wasmtime = { version = "21.0.1", features = ["component-model"] }
+wasmtime-wasi = "21.0.1"
