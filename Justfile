@@ -6,4 +6,4 @@ run:
     cargo run -p hotreload-host
 
 watch:
-    cargo watch -C game -- just lib
+    cargo watch -C game -w ../wit -w . -- just lib 
