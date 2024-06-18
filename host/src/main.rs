@@ -1,45 +1,48 @@
 use anyhow::Result;
-// use wasi_common::sync::WasiCtxBuilder;
-use wasmtime::component::*;
-use wasmtime::{Config, Engine, Store};
+use binding::{
+    exports::example::host::game_api::RenderCommand, WebAssemblyContext, WebAssemblyInstance,
+};
+
+use macroquad::prelude::*;
 
 // Generated wit code does not follow rust conventions completely
 #[allow(non_snake_case, non_camel_case_types, non_upper_case_globals)]
 mod binding;
 
-use binding::{HotreloadExample, MyState};
-use wasmtime_wasi::WasiCtxBuilder;
+#[macroquad::main("BasicShapes")]
+async fn main() -> Result<()> {
+    let font = load_ttf_font_from_bytes(include_bytes!("../../resources/Kreon-Regular.ttf"))
+        .expect("Unable to load font");
 
-fn main() -> Result<()> {
-    let mut config = Config::new();
-    config.wasm_component_model(true);
+    let context = WebAssemblyContext::load()?;
+    let mut assembly = WebAssemblyInstance::load(context)?;
+    let instance = assembly.create_game_instance()?;
 
-    let engine = Engine::new(&config)?;
+    loop {
+        let commands = instance.run_frame()?;
+        for command in commands {
+            match command {
+                RenderCommand::Text(text) => {
+                    draw_text_ex(
+                        &text.text,
+                        text.position.x,
+                        text.position.y,
+                        TextParams {
+                            font: Some(&font),
+                            font_size: text.size as u16,
+                            color: Color {
+                                r: text.color.r,
+                                g: text.color.g,
+                                b: text.color.b,
+                                a: text.color.a,
+                            },
+                            ..Default::default()
+                        },
+                    );
+                }
+            }
+        }
 
-    let mut wasm_path = std::env::current_exe()?;
-    wasm_path.pop();
-    wasm_path.push("game.wasm");
-
-    let component = Component::from_file(&engine, wasm_path)?;
-
-    let mut linker = Linker::new(&engine);
-    wasmtime_wasi::add_to_linker_sync(&mut linker)?;
-
-    let mut wasi = WasiCtxBuilder::new();
-
-    let mut store = Store::new(
-        &engine,
-        MyState {
-            ctx: wasi.build(),
-            table: ResourceTable::new(),
-        },
-    );
-    let (bindings, _) = HotreloadExample::instantiate(&mut store, &component, &linker)?;
-
-    let instance_type = bindings.example_host_game_api().game_instance();
-    let instance = instance_type.call_constructor(&mut store)?;
-    let commands = instance_type.call_run_frame(&mut store, instance)?;
-    println!("{commands:?}");
-
-    Ok(())
+        next_frame().await
+    }
 }

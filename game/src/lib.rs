@@ -22,12 +22,13 @@ impl GuestGameInstance for Instance {
 
     fn run_frame(&self) -> Vec<RenderCommand> {
         vec![RenderCommand::Text(TextCommand {
-            position: Position { x: 1.0, y: 3.0 },
-            size: 10.0,
+            text: "Hello World Again".to_string(),
+            position: Position { x: 40.0, y: 80.0 },
+            size: 28.0,
             color: Color {
                 r: 1.0,
-                g: 0.0,
-                b: 0.5,
+                g: 1.0,
+                b: 1.0,
                 a: 1.0,
             },
         })]
