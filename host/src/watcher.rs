@@ -12,7 +12,7 @@ use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use notify_debouncer_full::{new_debouncer, DebounceEventResult, Debouncer, FileIdMap};
 
 pub struct FileWatcher {
-    debouncer: Debouncer<RecommendedWatcher, FileIdMap>,
+    _debouncer: Debouncer<RecommendedWatcher, FileIdMap>,
     changed: Arc<AtomicBool>,
 }
 
@@ -38,7 +38,10 @@ impl FileWatcher {
             .cache()
             .add_root(&file, RecursiveMode::NonRecursive);
 
-        Ok(FileWatcher { debouncer, changed })
+        Ok(FileWatcher {
+            _debouncer: debouncer,
+            changed,
+        })
     }
 
     pub fn changed(&self) -> bool {
