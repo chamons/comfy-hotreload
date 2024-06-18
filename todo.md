@@ -1,4 +1,3 @@
-- Draw images
 - Draw lines
 - Keyboard interactions
 - Mouse interactions

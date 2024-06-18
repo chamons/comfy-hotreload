@@ -31,8 +31,7 @@ impl FileWatcher {
 
         debouncer
             .watcher()
-            .watch(&file, RecursiveMode::NonRecursive)
-            .unwrap();
+            .watch(&file, RecursiveMode::NonRecursive)?;
 
         debouncer
             .cache()

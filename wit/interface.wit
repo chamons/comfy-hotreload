@@ -20,8 +20,14 @@ interface game-api {
     color: color
   }
 
+  record image-command {
+    filename: string,
+    position: position,
+  }
+
   variant render-command {
-    text(text-command)  
+    text(text-command),
+    image(image-command)
   }
 
   resource game-instance {

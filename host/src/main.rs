@@ -2,16 +2,19 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use binding::{
-    exports::example::host::game_api::RenderCommand, WebAssemblyContext, WebAssemblyInstance,
+    exports::example::host::game_api::{ImageCommand, RenderCommand, TextCommand},
+    WebAssemblyContext, WebAssemblyInstance,
 };
 
 use macroquad::prelude::*;
+use texture_cache::TextureCache;
 use watcher::FileWatcher;
 
 // Generated wit code does not follow rust conventions completely
 #[allow(non_snake_case, non_camel_case_types, non_upper_case_globals)]
 mod binding;
 
+mod texture_cache;
 mod watcher;
 
 fn wasm_path() -> Result<PathBuf> {
@@ -25,6 +28,7 @@ fn wasm_path() -> Result<PathBuf> {
 async fn main() -> Result<()> {
     let font = load_ttf_font_from_bytes(include_bytes!("../../resources/Kreon-Regular.ttf"))
         .expect("Unable to load font");
+    let mut image_cache = TextureCache::default();
 
     let context = WebAssemblyContext::load()?;
     let mut assembly = WebAssemblyInstance::load(context)?;
@@ -42,27 +46,37 @@ async fn main() -> Result<()> {
         let commands = instance.run_frame()?;
         for command in commands {
             match command {
-                RenderCommand::Text(text) => {
-                    draw_text_ex(
-                        &text.text,
-                        text.position.x,
-                        text.position.y,
-                        TextParams {
-                            font: Some(&font),
-                            font_size: text.size as u16,
-                            color: Color {
-                                r: text.color.r,
-                                g: text.color.g,
-                                b: text.color.b,
-                                a: text.color.a,
-                            },
-                            ..Default::default()
-                        },
-                    );
-                }
+                RenderCommand::Text(text) => handle_text_command(text, &font),
+                RenderCommand::Image(image) => handle_image_command(image, &mut image_cache).await,
             }
         }
 
         next_frame().await
     }
+}
+
+async fn handle_image_command(image: ImageCommand, texture_cache: &mut TextureCache) {
+    // Ignore image loading errors and just skip render
+    if let Ok(texture) = texture_cache.get(&image.filename).await {
+        draw_texture(&texture, image.position.x, image.position.y, WHITE);
+    }
+}
+
+fn handle_text_command(text: TextCommand, font: &Font) {
+    draw_text_ex(
+        &text.text,
+        text.position.x,
+        text.position.y,
+        TextParams {
+            font: Some(&font),
+            font_size: text.size as u16,
+            color: Color {
+                r: text.color.r,
+                g: text.color.g,
+                b: text.color.b,
+                a: text.color.a,
+            },
+            ..Default::default()
+        },
+    );
 }
