@@ -4,3 +4,6 @@ lib:
 
 run:
     cargo run -p hotreload-host
+
+watch:
+    cargo watch -C game -- just lib

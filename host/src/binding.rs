@@ -7,6 +7,8 @@ use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
 use exports::example::host::game_api::{GuestGameInstance, RenderCommand};
 
+use crate::wasm_path;
+
 bindgen!({
     path: "../wit"
 });
@@ -57,9 +59,7 @@ pub struct WebAssemblyInstance {
 
 impl WebAssemblyInstance {
     pub fn load(mut context: WebAssemblyContext) -> Result<WebAssemblyInstance> {
-        let mut wasm_path = std::env::current_exe()?;
-        wasm_path.pop();
-        wasm_path.push("game.wasm");
+        let wasm_path = wasm_path()?;
 
         let component = Component::from_file(&context.engine, wasm_path)?;
 

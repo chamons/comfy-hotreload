@@ -8,3 +8,5 @@ anyhow = "1.0.86"
 wasmtime = { version = "21.0.1", features = ["component-model"] }
 wasmtime-wasi = "21.0.1"
 macroquad = "0.4"
+notify-debouncer-full = "0.3.1"
+notify = "6.1.1"
