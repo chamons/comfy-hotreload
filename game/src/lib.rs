@@ -1,19 +1,37 @@
 wit_bindgen::generate!({
-    world: "hello-world",
+    world: "hotreload-example",
     path: "../wit"
 });
 
-// Define a custom type and implement the generated `Guest` trait for it which
-// represents implementing all the necessary exported interfaces for this
-// component.
-struct MyHost;
+use exports::example::host::game_api::{
+    Color, Guest, GuestGameInstance, Position, RenderCommand, TextCommand,
+};
 
-impl Guest for MyHost {
-    fn run() {
-        print("Hello, world!");
+struct GameGuest;
+
+impl Guest for GameGuest {
+    type GameInstance = Instance;
+}
+
+struct Instance {}
+
+impl GuestGameInstance for Instance {
+    fn new() -> Instance {
+        Instance {}
+    }
+
+    fn run_frame(&self) -> Vec<RenderCommand> {
+        vec![RenderCommand::Text(TextCommand {
+            position: Position { x: 1.0, y: 3.0 },
+            size: 10.0,
+            color: Color {
+                r: 1.0,
+                g: 0.0,
+                b: 0.5,
+                a: 1.0,
+            },
+        })]
     }
 }
 
-// export! defines that the `MyHost` struct defined below is going to define
-// the exports of the `world`, namely the `run` function.
-export!(MyHost);
+export!(GameGuest);

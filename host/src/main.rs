@@ -7,7 +7,7 @@ use wasmtime::{Config, Engine, Store};
 #[allow(non_snake_case, non_camel_case_types, non_upper_case_globals)]
 mod binding;
 
-use binding::{HelloWorld, MyState};
+use binding::{HotreloadExample, MyState};
 use wasmtime_wasi::WasiCtxBuilder;
 
 fn main() -> Result<()> {
@@ -24,7 +24,6 @@ fn main() -> Result<()> {
 
     let mut linker = Linker::new(&engine);
     wasmtime_wasi::add_to_linker_sync(&mut linker)?;
-    HelloWorld::add_to_linker(&mut linker, |state: &mut MyState| state)?;
 
     let mut wasi = WasiCtxBuilder::new();
 
@@ -35,8 +34,12 @@ fn main() -> Result<()> {
             table: ResourceTable::new(),
         },
     );
-    let (bindings, _) = HelloWorld::instantiate(&mut store, &component, &linker)?;
+    let (bindings, _) = HotreloadExample::instantiate(&mut store, &component, &linker)?;
 
-    bindings.call_run(&mut store)?;
+    let instance_type = bindings.example_host_game_api().game_instance();
+    let instance = instance_type.call_constructor(&mut store)?;
+    let commands = instance_type.call_run_frame(&mut store, instance)?;
+    println!("{commands:?}");
+
     Ok(())
 }

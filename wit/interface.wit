@@ -1,7 +1,35 @@
 package example:host;
 
-world hello-world {
-  import print: func(msg: string);
+interface game-api {
+  record color {
+    r: f32,
+    g: f32,
+    b: f32,
+    a: f32
+  }
 
-  export run: func();
+  record position {
+    x: f32,
+    y: f32
+  }
+
+  record text-command {
+    position: position,
+    size: f32,
+    color: color
+  }
+
+  variant render-command {
+    text(text-command)  
+  }
+
+  resource game-instance {
+    constructor();
+
+    run-frame: func() -> list<render-command>;
+  }
+}
+
+world hotreload-example {
+  export game-api;
 }

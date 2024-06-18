@@ -20,9 +20,3 @@ impl WasiView for MyState {
         &mut self.table
     }
 }
-
-impl HelloWorldImports for MyState {
-    fn print(&mut self, msg: String) {
-        println!("{msg}");
-    }
-}
