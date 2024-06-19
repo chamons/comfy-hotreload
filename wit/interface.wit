@@ -185,6 +185,8 @@ interface game-api {
     constructor();
 
     run-frame: func(mouse: mouse-info, key: keyboard-info) -> list<render-command>;
+    save: func() -> list<u8>;
+    restore: func(data: list<u8>);
   }
 }
 

@@ -1,4 +1,2 @@
-- Save State
-- Load State
 - Demo
 - Readme

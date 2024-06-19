@@ -38,9 +38,13 @@ async fn main() -> Result<()> {
 
     loop {
         if file_watcher.changed() {
+            let save_data = instance.save();
             let context = WebAssemblyContext::load()?;
             assembly = WebAssemblyInstance::load(context)?;
             instance = assembly.create_game_instance()?;
+            if let Ok(save_data) = save_data {
+                let _ = instance.load(save_data);
+            }
         }
 
         let commands = instance.run_frame()?;

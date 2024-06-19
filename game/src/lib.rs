@@ -3,10 +3,13 @@ wit_bindgen::generate!({
     path: "../wit"
 });
 
+use std::cell::RefCell;
+
 use exports::example::host::game_api::{
     Color, DrawLineCommand, Guest, GuestGameInstance, ImageCommand, KeyboardInfo, MouseInfo,
     Position, RenderCommand, TextCommand,
 };
+use serde::{Deserialize, Serialize};
 
 struct GameGuest;
 
@@ -14,17 +17,39 @@ impl Guest for GameGuest {
     type GameInstance = Instance;
 }
 
-struct Instance {}
+#[derive(Debug, Default, Serialize, Deserialize)]
+struct GameState {
+    count: u32,
+}
+
+struct Instance {
+    state: RefCell<GameState>,
+}
 
 impl GuestGameInstance for Instance {
     fn new() -> Instance {
-        Instance {}
+        Instance {
+            state: RefCell::new(GameState { count: 0 }),
+        }
+    }
+
+    fn save(&self) -> Vec<u8> {
+        bincode::serialize(&*self.state.borrow()).expect("Unable to save state")
+    }
+
+    fn restore(&self, data: Vec<u8>) {
+        *self.state.borrow_mut() = bincode::deserialize(&data).expect("Unable to restore state");
     }
 
     fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
+        if mouse.left.pressed {
+            let mut state = self.state.borrow_mut();
+            state.count += 1;
+        }
+
         vec![
             RenderCommand::Text(TextCommand {
-                text: "Hello".to_string(),
+                text: format!("Count: {}", self.state.borrow().count),
                 position: Position { x: 40.0, y: 80.0 },
                 size: 40.0,
                 color: Color {

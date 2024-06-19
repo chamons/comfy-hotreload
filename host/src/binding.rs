@@ -110,6 +110,20 @@ impl<'a> GameInstance<'a> {
         self.instance_type
             .call_run_frame(&mut context.store, self.instance, mouse, &key)
     }
+
+    pub fn save(&self) -> Result<Vec<u8>> {
+        let mut context = self.context.borrow_mut();
+
+        self.instance_type
+            .call_save(&mut context.store, self.instance)
+    }
+
+    pub fn load(&self, data: Vec<u8>) -> Result<()> {
+        let mut context = self.context.borrow_mut();
+
+        self.instance_type
+            .call_restore(&mut context.store, self.instance, &data)
+    }
 }
 
 fn get_key_info() -> KeyboardInfo {
