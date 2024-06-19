@@ -1,4 +1,3 @@
-- Draw lines
 - Keyboard interactions
 - Mouse interactions
 - Save State

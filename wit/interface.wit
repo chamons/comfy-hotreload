@@ -25,9 +25,17 @@ interface game-api {
     position: position,
   }
 
+   record draw-line-command {
+    first: position,
+    second: position,
+    thickness: f32,
+    color: color
+  }
+
   variant render-command {
     text(text-command),
-    image(image-command)
+    image(image-command),
+    line(draw-line-command)
   }
 
   resource game-instance {

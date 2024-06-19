@@ -4,7 +4,8 @@ wit_bindgen::generate!({
 });
 
 use exports::example::host::game_api::{
-    Color, Guest, GuestGameInstance, ImageCommand, Position, RenderCommand, TextCommand,
+    Color, DrawLineCommand, Guest, GuestGameInstance, ImageCommand, Position, RenderCommand,
+    TextCommand,
 };
 
 struct GameGuest;
@@ -36,6 +37,17 @@ impl GuestGameInstance for Instance {
             RenderCommand::Image(ImageCommand {
                 filename: "resources/rustacean-flat-happy.png".to_string(),
                 position: Position { x: 300.0, y: 180.0 },
+            }),
+            RenderCommand::Line(DrawLineCommand {
+                first: Position { x: 100.0, y: 100.0 },
+                second: Position { x: 200.0, y: 200.0 },
+                thickness: 4.0,
+                color: Color {
+                    r: 1.0,
+                    g: 0.0,
+                    b: 0.0,
+                    a: 1.0,
+                },
             }),
         ]
     }

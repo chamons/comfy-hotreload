@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use binding::{
-    exports::example::host::game_api::{ImageCommand, RenderCommand, TextCommand},
+    exports::example::host::game_api::{DrawLineCommand, ImageCommand, RenderCommand, TextCommand},
     WebAssemblyContext, WebAssemblyInstance,
 };
 
@@ -48,11 +48,28 @@ async fn main() -> Result<()> {
             match command {
                 RenderCommand::Text(text) => handle_text_command(text, &font),
                 RenderCommand::Image(image) => handle_image_command(image, &mut image_cache).await,
+                RenderCommand::Line(line) => handle_draw_line(line),
             }
         }
 
         next_frame().await
     }
+}
+
+fn handle_draw_line(line: DrawLineCommand) {
+    draw_line(
+        line.first.x,
+        line.first.y,
+        line.second.x,
+        line.second.y,
+        line.thickness,
+        Color {
+            r: line.color.r,
+            g: line.color.g,
+            b: line.color.b,
+            a: line.color.a,
+        },
+    )
 }
 
 async fn handle_image_command(image: ImageCommand, texture_cache: &mut TextureCache) {
