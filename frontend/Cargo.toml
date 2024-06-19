@@ -6,3 +6,11 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.86"
 macroquad = "0.4"
+wasmtime = { version = "21.0.1", features = [
+    "component-model",
+], optional = true }
+game = { path = "../game", optional = true }
+
+[features]
+webassembly = ["dep:wasmtime"]
+direct = ["dep:game"]

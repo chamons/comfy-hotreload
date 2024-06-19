@@ -7,5 +7,5 @@ edition = "2021"
 anyhow = "1.0.86"
 macroquad = "0.4"
 
-frontend = { path = "../frontend" }
+frontend = { path = "../frontend", features = ["direct"] }
 game = { path = "../game" }

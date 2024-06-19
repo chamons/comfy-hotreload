@@ -4,19 +4,13 @@ use anyhow::Result;
 
 use macroquad::prelude::*;
 
-use wasmtime::component::{bindgen, Component, Linker, ResourceAny};
+use wasmtime::component::{Component, Linker, ResourceAny};
 use wasmtime::{Config, Engine, Store};
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
-use exports::example::host::game_api::{
-    ClickInfo, GuestGameInstance, Key, KeyboardInfo, MouseInfo, Position, RenderCommand,
-};
+use frontend::types::*;
 
 use crate::wasm_path;
-
-bindgen!({
-    path: "../wit"
-});
 
 pub struct MyState {
     pub ctx: WasiCtx,

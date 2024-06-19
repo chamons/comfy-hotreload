@@ -26,22 +26,22 @@ pub struct Instance {
     state: RefCell<GameState>,
 }
 
-impl GuestGameInstance for Instance {
-    fn new() -> Instance {
+impl Instance {
+    pub fn new() -> Instance {
         Instance {
             state: RefCell::new(GameState { count: 0 }),
         }
     }
 
-    fn save(&self) -> Vec<u8> {
+    pub fn save(&self) -> Vec<u8> {
         bincode::serialize(&*self.state.borrow()).expect("Unable to save state")
     }
 
-    fn restore(&self, data: Vec<u8>) {
+    pub fn restore(&self, data: Vec<u8>) {
         *self.state.borrow_mut() = bincode::deserialize(&data).expect("Unable to restore state");
     }
 
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
+    pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
         if mouse.left.pressed {
             let mut state = self.state.borrow_mut();
             state.count += 1;
@@ -123,6 +123,24 @@ impl GuestGameInstance for Instance {
                 },
             }),
         ]
+    }
+}
+
+impl GuestGameInstance for Instance {
+    fn new() -> Instance {
+        Instance::new()
+    }
+
+    fn save(&self) -> Vec<u8> {
+        Instance::save(self)
+    }
+
+    fn restore(&self, data: Vec<u8>) {
+        Instance::restore(self, data)
+    }
+
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
+        Instance::run_frame(self, mouse, key)
     }
 }
 

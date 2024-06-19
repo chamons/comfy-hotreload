@@ -11,4 +11,4 @@ macroquad = "0.4"
 notify-debouncer-full = "0.3.1"
 notify = "6.1.1"
 
-frontend = { path = "../frontend" }
+frontend = { path = "../frontend", features = ["webassembly"] }

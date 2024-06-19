@@ -2,7 +2,7 @@ use anyhow::Result;
 use frontend::TextureCache;
 use macroquad::prelude::*;
 
-use game::{exports::example::host::game_api::*, Instance};
+use frontend::types::*;
 
 #[macroquad::main("BasicShapes")]
 async fn main() -> Result<()> {

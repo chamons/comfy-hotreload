@@ -639,7 +639,9 @@ name = "frontend"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "game",
  "macroquad",
+ "wasmtime",
 ]
 
 [[package]]

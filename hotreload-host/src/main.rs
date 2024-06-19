@@ -1,17 +1,14 @@
 use std::path::PathBuf;
 
 use anyhow::Result;
-use binding::{
-    exports::example::host::game_api::{DrawLineCommand, ImageCommand, RenderCommand, TextCommand},
-    WebAssemblyContext, WebAssemblyInstance,
-};
+use binding::WebAssemblyContext;
+use binding::WebAssemblyInstance;
+use frontend::types::*;
 
 use frontend::TextureCache;
 use macroquad::prelude::*;
 use watcher::FileWatcher;
 
-// Generated wit code does not follow rust conventions completely
-#[allow(non_snake_case, non_camel_case_types, non_upper_case_globals)]
 mod binding;
 
 mod watcher;
