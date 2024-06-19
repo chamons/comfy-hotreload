@@ -635,6 +635,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "frontend"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "macroquad",
+]
+
+[[package]]
 name = "fs-set-times"
 version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -831,10 +839,10 @@ name = "hotreload-host"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "frontend",
  "macroquad",
  "notify",
  "notify-debouncer-full",
- "render",
  "wasmtime",
  "wasmtime-wasi",
 ]
@@ -1142,9 +1150,9 @@ name = "launcher"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "frontend",
  "game",
  "macroquad",
- "render",
 ]
 
 [[package]]
@@ -1607,14 +1615,6 @@ dependencies = [
  "rustc-hash",
  "slice-group-by",
  "smallvec",
-]
-
-[[package]]
-name = "render"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "macroquad",
 ]
 
 [[package]]

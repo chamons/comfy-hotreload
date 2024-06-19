@@ -1,1 +1,2 @@
+- Remove code duplicate between launcher and hotreload-host if possible
 - Readme

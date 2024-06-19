@@ -6,8 +6,8 @@ use binding::{
     WebAssemblyContext, WebAssemblyInstance,
 };
 
+use frontend::TextureCache;
 use macroquad::prelude::*;
-use render::TextureCache;
 use watcher::FileWatcher;
 
 // Generated wit code does not follow rust conventions completely

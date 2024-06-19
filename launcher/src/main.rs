@@ -1,6 +1,6 @@
 use anyhow::Result;
+use frontend::TextureCache;
 use macroquad::prelude::*;
-use render::TextureCache;
 
 use game::{exports::example::host::game_api::*, Instance};
 
