@@ -1,5 +1,4 @@
 - Keyboard interactions
-- Mouse interactions
 - Save State
 - Load State
 - Demo

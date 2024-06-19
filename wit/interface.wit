@@ -25,7 +25,7 @@ interface game-api {
     position: position,
   }
 
-   record draw-line-command {
+  record draw-line-command {
     first: position,
     second: position,
     thickness: f32,
@@ -38,10 +38,23 @@ interface game-api {
     line(draw-line-command)
   }
 
+  record click-info {
+    pressed: bool,
+    released: bool,
+    down: bool
+  }
+
+  record mouse-info {
+    position: position,
+    left: click-info,
+    right: click-info,
+    middle: click-info
+  }
+
   resource game-instance {
     constructor();
 
-    run-frame: func() -> list<render-command>;
+    run-frame: func(mouse: mouse-info) -> list<render-command>;
   }
 }
 

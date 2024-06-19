@@ -4,8 +4,8 @@ wit_bindgen::generate!({
 });
 
 use exports::example::host::game_api::{
-    Color, DrawLineCommand, Guest, GuestGameInstance, ImageCommand, Position, RenderCommand,
-    TextCommand,
+    Color, DrawLineCommand, Guest, GuestGameInstance, ImageCommand, MouseInfo, Position,
+    RenderCommand, TextCommand,
 };
 
 struct GameGuest;
@@ -21,7 +21,7 @@ impl GuestGameInstance for Instance {
         Instance {}
     }
 
-    fn run_frame(&self) -> Vec<RenderCommand> {
+    fn run_frame(&self, mouse: MouseInfo) -> Vec<RenderCommand> {
         vec![
             RenderCommand::Text(TextCommand {
                 text: "Hello".to_string(),
@@ -34,12 +34,23 @@ impl GuestGameInstance for Instance {
                     a: 1.0,
                 },
             }),
+            RenderCommand::Text(TextCommand {
+                text: format!("Mouse: ({}, {})", mouse.position.x, mouse.position.y),
+                position: Position { x: 40.0, y: 105.0 },
+                size: 20.0,
+                color: Color {
+                    r: 0.0,
+                    g: 1.0,
+                    b: 1.0,
+                    a: 1.0,
+                },
+            }),
             RenderCommand::Image(ImageCommand {
                 filename: "resources/rustacean-flat-happy.png".to_string(),
                 position: Position { x: 300.0, y: 180.0 },
             }),
             RenderCommand::Line(DrawLineCommand {
-                first: Position { x: 100.0, y: 100.0 },
+                first: Position { x: 125.0, y: 125.0 },
                 second: Position { x: 200.0, y: 200.0 },
                 thickness: 4.0,
                 color: Color {

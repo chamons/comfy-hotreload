@@ -1,11 +1,16 @@
 use std::{cell::RefCell, rc::Rc};
 
 use anyhow::Result;
+
+use macroquad::prelude::*;
+
 use wasmtime::component::{bindgen, Component, Linker, ResourceAny};
 use wasmtime::{Config, Engine, Store};
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
-use exports::example::host::game_api::{GuestGameInstance, RenderCommand};
+use exports::example::host::game_api::{
+    ClickInfo, GuestGameInstance, MouseInfo, Position, RenderCommand,
+};
 
 use crate::wasm_path;
 
@@ -98,7 +103,35 @@ pub struct GameInstance<'a> {
 impl<'a> GameInstance<'a> {
     pub fn run_frame(&self) -> Result<Vec<RenderCommand>> {
         let mut context = self.context.borrow_mut();
+
+        let mouse = get_mouse_state();
+
         self.instance_type
-            .call_run_frame(&mut context.store, self.instance)
+            .call_run_frame(&mut context.store, self.instance, mouse)
+    }
+}
+
+fn get_mouse_state() -> MouseInfo {
+    let mouse_position = mouse_position();
+    MouseInfo {
+        position: Position {
+            x: mouse_position.0,
+            y: mouse_position.1,
+        },
+        left: ClickInfo {
+            pressed: is_mouse_button_pressed(MouseButton::Left),
+            released: is_mouse_button_released(MouseButton::Left),
+            down: is_mouse_button_down(MouseButton::Left),
+        },
+        right: ClickInfo {
+            pressed: is_mouse_button_pressed(MouseButton::Right),
+            released: is_mouse_button_released(MouseButton::Right),
+            down: is_mouse_button_down(MouseButton::Right),
+        },
+        middle: ClickInfo {
+            pressed: is_mouse_button_pressed(MouseButton::Middle),
+            released: is_mouse_button_released(MouseButton::Middle),
+            down: is_mouse_button_down(MouseButton::Middle),
+        },
     }
 }
