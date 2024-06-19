@@ -1,0 +1,11 @@
+[package]
+name = "launcher"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+macroquad = "0.4"
+
+render = { path = "../render" }
+game = { path = "../game" }

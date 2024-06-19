@@ -7,14 +7,13 @@ use binding::{
 };
 
 use macroquad::prelude::*;
-use texture_cache::TextureCache;
+use render::TextureCache;
 use watcher::FileWatcher;
 
 // Generated wit code does not follow rust conventions completely
 #[allow(non_snake_case, non_camel_case_types, non_upper_case_globals)]
 mod binding;
 
-mod texture_cache;
 mod watcher;
 
 fn wasm_path() -> Result<PathBuf> {

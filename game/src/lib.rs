@@ -6,7 +6,7 @@ wit_bindgen::generate!({
 use std::cell::RefCell;
 
 use exports::example::host::game_api::{
-    Color, DrawLineCommand, Guest, GuestGameInstance, ImageCommand, KeyboardInfo, MouseInfo,
+    DrawLineCommand, GameColor, Guest, GuestGameInstance, ImageCommand, KeyboardInfo, MouseInfo,
     Position, RenderCommand, Size, TextCommand,
 };
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ struct GameState {
     count: u32,
 }
 
-struct Instance {
+pub struct Instance {
     state: RefCell<GameState>,
 }
 
@@ -52,7 +52,7 @@ impl GuestGameInstance for Instance {
                 text: "Hot Reloading with Rust!".to_string(),
                 position: Position { x: 40.0, y: 80.0 },
                 size: 40.0,
-                color: Color {
+                color: GameColor {
                     r: 0.0,
                     g: 1.0,
                     b: 1.0,
@@ -71,7 +71,7 @@ impl GuestGameInstance for Instance {
                 text: format!("Count: {}", self.state.borrow().count),
                 position: Position { x: 40.0, y: 120.0 },
                 size: 20.0,
-                color: Color {
+                color: GameColor {
                     r: 0.0,
                     g: 1.0,
                     b: 1.0,
@@ -82,7 +82,7 @@ impl GuestGameInstance for Instance {
                 text: format!("Key Down: ({:?})", key.down),
                 position: Position { x: 40.0, y: 160.0 },
                 size: 20.0,
-                color: Color {
+                color: GameColor {
                     r: 0.0,
                     g: 1.0,
                     b: 1.0,
@@ -93,7 +93,7 @@ impl GuestGameInstance for Instance {
                 text: format!("Mouse: ({}, {})", mouse.position.x, mouse.position.y),
                 position: Position { x: 40.0, y: 185.0 },
                 size: 20.0,
-                color: Color {
+                color: GameColor {
                     r: 0.0,
                     g: 1.0,
                     b: 1.0,
@@ -104,7 +104,7 @@ impl GuestGameInstance for Instance {
                 first: Position { x: 625.0, y: 125.0 },
                 second: Position { x: 675.0, y: 200.0 },
                 thickness: 4.0,
-                color: Color {
+                color: GameColor {
                     r: 1.0,
                     g: 0.0,
                     b: 0.0,
@@ -115,7 +115,7 @@ impl GuestGameInstance for Instance {
                 first: Position { x: 700.0, y: 125.0 },
                 second: Position { x: 700.0, y: 200.0 },
                 thickness: 4.0,
-                color: Color {
+                color: GameColor {
                     r: 0.0,
                     g: 0.0,
                     b: 1.0,

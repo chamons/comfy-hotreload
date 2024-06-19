@@ -1,9 +1,13 @@
 {
     "cSpell.words": [
         "bindgen",
+        "cabi",
         "debouncer",
+        "dylib",
         "rustacean",
+        "undefines",
         "wasi",
-        "wasmtime"
+        "wasmtime",
+        "webassembly"
     ]
 }

@@ -125,7 +125,7 @@ interface game-api {
     unknown,
   }
 
-  record color {
+  record game-color {
     r: f32,
     g: f32,
     b: f32,
@@ -146,7 +146,7 @@ interface game-api {
     text: string,
     position: position,
     size: f32,
-    color: color
+    color: game-color
   }
 
   record image-command {
@@ -159,7 +159,7 @@ interface game-api {
     first: position,
     second: position,
     thickness: f32,
-    color: color
+    color: game-color
   }
 
   variant render-command {
