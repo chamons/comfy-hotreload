@@ -1,4 +1,3 @@
-- Keyboard interactions
 - Save State
 - Load State
 - Demo

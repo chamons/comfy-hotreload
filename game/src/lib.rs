@@ -4,8 +4,8 @@ wit_bindgen::generate!({
 });
 
 use exports::example::host::game_api::{
-    Color, DrawLineCommand, Guest, GuestGameInstance, ImageCommand, MouseInfo, Position,
-    RenderCommand, TextCommand,
+    Color, DrawLineCommand, Guest, GuestGameInstance, ImageCommand, KeyboardInfo, MouseInfo,
+    Position, RenderCommand, TextCommand,
 };
 
 struct GameGuest;
@@ -21,7 +21,7 @@ impl GuestGameInstance for Instance {
         Instance {}
     }
 
-    fn run_frame(&self, mouse: MouseInfo) -> Vec<RenderCommand> {
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
         vec![
             RenderCommand::Text(TextCommand {
                 text: "Hello".to_string(),
@@ -35,8 +35,19 @@ impl GuestGameInstance for Instance {
                 },
             }),
             RenderCommand::Text(TextCommand {
-                text: format!("Mouse: ({}, {})", mouse.position.x, mouse.position.y),
+                text: format!("Key Down: ({:?})", key.down),
                 position: Position { x: 40.0, y: 105.0 },
+                size: 20.0,
+                color: Color {
+                    r: 0.0,
+                    g: 1.0,
+                    b: 1.0,
+                    a: 1.0,
+                },
+            }),
+            RenderCommand::Text(TextCommand {
+                text: format!("Mouse: ({}, {})", mouse.position.x, mouse.position.y),
+                position: Position { x: 40.0, y: 125.0 },
                 size: 20.0,
                 color: Color {
                     r: 0.0,
