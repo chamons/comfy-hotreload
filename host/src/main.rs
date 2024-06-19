@@ -79,7 +79,14 @@ fn handle_draw_line(line: DrawLineCommand) {
 async fn handle_image_command(image: ImageCommand, texture_cache: &mut TextureCache) {
     // Ignore image loading errors and just skip render
     if let Ok(texture) = texture_cache.get(&image.filename).await {
-        draw_texture(&texture, image.position.x, image.position.y, WHITE);
+        let mut params = DrawTextureParams::default();
+        if let Some(size) = image.size {
+            params.dest_size = Some(Vec2 {
+                x: size.width,
+                y: size.height,
+            })
+        }
+        draw_texture_ex(&texture, image.position.x, image.position.y, WHITE, params);
     }
 }
 

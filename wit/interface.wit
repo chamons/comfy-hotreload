@@ -137,6 +137,11 @@ interface game-api {
     y: f32
   }
 
+  record size {
+    width: f32,
+    height: f32
+  }
+
   record text-command {
     text: string,
     position: position,
@@ -147,6 +152,7 @@ interface game-api {
   record image-command {
     filename: string,
     position: position,
+    size: option<size>
   }
 
   record draw-line-command {
