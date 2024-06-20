@@ -7,5 +7,20 @@ edition = "2021"
 anyhow = "1.0.86"
 macroquad = "0.4"
 
-frontend = { path = "../frontend", features = ["direct"] }
+# TODO - Can we remove this in hotreload even if unused?
 game = { path = "../game" }
+
+wasmtime = { version = "21.0.1", features = [
+    "component-model",
+], optional = true }
+wasmtime-wasi = { version = "21.0.1", optional = true }
+notify-debouncer-full = { version = "0.3.1", optional = true }
+notify = { version = "6.1.1", optional = true }
+
+[features]
+hotreload = [
+    "dep:wasmtime",
+    "dep:wasmtime-wasi",
+    "dep:notify-debouncer-full",
+    "dep:notify",
+]

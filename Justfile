@@ -5,8 +5,8 @@ lib:
 watch:
     cargo watch -C game -w ../wit -w . -- just lib 
 
-launcher:
+run:
     cargo run -p launcher
 
 hotreload:
-    cargo run -p hotreload-host
+    cargo run -p launcher -F hotreload

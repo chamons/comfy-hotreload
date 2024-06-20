@@ -1,3 +1,2 @@
-- Fix clippy confusion
-- Remove code duplicate between launcher and hotreload-host if possible
+- Try to remove unnecessary dependency
 - Readme

@@ -635,16 +635,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "frontend"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "game",
- "macroquad",
- "wasmtime",
-]
-
-[[package]]
 name = "fs-set-times"
 version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -835,19 +825,6 @@ name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
-
-[[package]]
-name = "hotreload-host"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "frontend",
- "macroquad",
- "notify",
- "notify-debouncer-full",
- "wasmtime",
- "wasmtime-wasi",
-]
 
 [[package]]
 name = "iana-time-zone"
@@ -1152,9 +1129,12 @@ name = "launcher"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "frontend",
  "game",
  "macroquad",
+ "notify",
+ "notify-debouncer-full",
+ "wasmtime",
+ "wasmtime-wasi",
 ]
 
 [[package]]

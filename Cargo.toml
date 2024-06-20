@@ -1,3 +1,3 @@
 [workspace]
-members = ["game", "hotreload-host", "launcher", "frontend"]
+members = ["game", "launcher"]
 resolver = "2"
