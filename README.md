@@ -4,3 +4,45 @@ This repository is an example project using the power of [Web Assembly](https://
 
 ## Screenshot
 ![Screen Shot](./docs/screenshot.png)
+
+## Getting Started
+
+1. Install [Just](https://github.com/casey/just)
+2. In one terminal window run `just watch` to start compiling the game assembly on every change
+3. In another terminal window, run `just hotreload`
+4. Make a change in `game/src/lib.rs` to some text or a color, save the file, and watch the logic
+5. Click to increment the counter, and hotreload with another change to see that the state survives
+5. Run `just run` to run the project without wasmtime or hotreloading
+
+## How does it work?
+
+The project is split up into two crates:
+
+- Game (A simple library) - Contains all of the core logic describing the scene to be drawn, how to interact with keyboard/mouse, etc. 
+- Launcher (A macroquad game binary) - A uncommonly changed shell which forwards UX interactions and draws to the screen as requested
+
+The launcher contains a feature flag `hotreload` which changes how the launcher consumers the game crate:
+
+Without `hotreload` the `Launcher` has a direct hard library dependency on `Game` and nothing special happens.
+
+With `hotreload` however the Launcher loads up a web assembly packaged version of the launcher crate via wasmtime. A simple file watcher then waits for the assembly file to change, and then reloads it before processing the next frame. Before this reload, the entire state of the game is serialized via Serde which is then restored inside the new web assembly instance.
+
+## How does the host launcher communicate with the game?
+
+There is a WebAssembly Component Interface file (`wit/interface.wit`) which contains a simple stateless interface to a portion of macroquad. Each frame is passed the state of the mouse and keyboard and returns a vector of draw instructions. These instructions are then executed within the launcher host.
+
+As we want to arbitrarily reload the game, the global state of the graphics stack and window must not be lost. This is why the Game does not directly use macroquad.
+
+Note: It would be possible to have the game web assembly directly call exposed interfaces to invoke macroquad, but it was decided to use a set of commands to keep the FFI boundary from being too "chatty".
+
+## Areas for improvement
+
+### Unnecessary Dependency
+
+The launcher binary uses a feature flag to enable hot reload goodness. Unfortunately it is not possible to remove a dependency, so there is an "unnecessary" hard link from game to launcher even in the hotreload case. The launcher is written to never use the game dependency in hotreload contexts, but if it did those portions would not be hotreloaded (or you would get a compile error).
+
+It is possible to use two inverse feature flags (hotreload and direct), but that is discouraged behavior. I have not looked into this much yet. In the past the crate hierarchy was more complex and feature unification prevented from being an option.
+
+### WIT interface interactions with VSCode
+
+As the WIT interface used between the worlds is code generated, it is not always trivial to see the final rust interface, as you can not jump to definition. The `rust-analyzer: Expand macro recursively at caret` feature can be useful, but it is not an ideal user experience.

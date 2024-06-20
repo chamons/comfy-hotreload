@@ -7,10 +7,9 @@ edition = "2021"
 anyhow = "1.0.86"
 macroquad = "0.4"
 
-# Unfortuntely features can not remove a dependency
-# and feature unification in a workspace means we can not
-# use two opposite features here. So we'll just have a game
-# dependency we can't reference in hotload paths
+# Unfortuntely features can not remove a dependency.
+# We could look at two inverse feature flags now that
+# we have simplified the crate hierarchy
 # This is a bit of a footgun :(
 game = { path = "../game" }
 
