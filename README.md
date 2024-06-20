@@ -35,6 +35,14 @@ As we want to arbitrarily reload the game, the global state of the graphics stac
 
 Note: It would be possible to have the game web assembly directly call exposed interfaces to invoke macroquad, but it was decided to use a set of commands to keep the FFI boundary from being too "chatty".
 
+## Why not just use hot-lib-reloader-rs
+
+[hot-lib-reloader-rs](https://github.com/rksm/hot-lib-reloader-rs) is an impressive crate, but in my experience was never stable enough to actually save me much time. About 1 in 5 times my projects would crazy, so I had to setup a relaunch script, which would occasionally go haywire and need to be manually killed.
+
+Any use of any thread local storage, or function pointers (dyn traits) would caused it to misbehave. This applied significant design pressure to how the project needed to be laid out to be "binary reload friendly".
+
+So far WASM hot reloading has been completely stable in my experience.
+
 ## Areas for improvement
 
 ### Unnecessary Dependency
