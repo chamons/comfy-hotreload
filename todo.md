@@ -1,2 +1,1 @@
-- Try to remove unnecessary dependency
 - Readme

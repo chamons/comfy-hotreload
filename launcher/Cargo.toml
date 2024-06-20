@@ -7,7 +7,11 @@ edition = "2021"
 anyhow = "1.0.86"
 macroquad = "0.4"
 
-# TODO - Can we remove this in hotreload even if unused?
+# Unfortuntely features can not remove a dependency
+# and feature unification in a workspace means we can not
+# use two opposite features here. So we'll just have a game
+# dependency we can't reference in hotload paths
+# This is a bit of a footgun :(
 game = { path = "../game" }
 
 wasmtime = { version = "21.0.1", features = [
