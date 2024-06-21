@@ -7,6 +7,7 @@ This repository is an example project using the power of [Web Assembly](https://
 
 ## Getting Started
 
+0. `rustup target add wasm32-wasi && cargo install wasm-tools`
 1. Install [Just](https://github.com/casey/just)
 2. In one terminal window run `just watch` to start compiling the game assembly on every change
 3. In another terminal window, run `just hotreload`
