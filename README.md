@@ -7,7 +7,7 @@ This repository is an example project using the power of [Web Assembly](https://
 
 ## Getting Started
 
-0. `rustup target add wasm32-wasi && cargo install wasm-tools`
+0. `rustup target add wasm32-wasip1 && cargo install wasm-tools`
 1. Install [Just](https://github.com/casey/just)
 2. In one terminal window run `just watch` to start compiling the game assembly on every change
 3. In another terminal window, run `just hotreload`
@@ -33,8 +33,6 @@ With `hotreload` however the Launcher loads up a web assembly packaged version o
 There is a WebAssembly Component Interface file (`wit/interface.wit`) which contains a simple stateless interface to a portion of macroquad. Each frame is passed the state of the mouse and keyboard and returns a vector of draw instructions. These instructions are then executed within the launcher host.
 
 As we want to arbitrarily reload the game, the global state of the graphics stack and window must not be lost. This is why the Game does not directly use macroquad.
-
-Note: It would be possible to have the game web assembly directly call exposed interfaces to invoke macroquad, but it was decided to use a set of commands to keep the FFI boundary from being too "chatty".
 
 ## Why not just use hot-lib-reloader-rs
 

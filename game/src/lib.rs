@@ -1,14 +1,15 @@
 wit_bindgen::generate!({
     world: "hotreload-example",
-    path: "../wit"
+    path: "../wit",
 });
 
 use std::cell::RefCell;
 
-use exports::example::host::game_api::{
-    DrawLineCommand, GameColor, Guest, GuestGameInstance, ImageCommand, KeyboardInfo, MouseInfo,
-    Position, RenderCommand, Size, TextCommand,
-};
+use example::host::host_api::{GameColor, Position, Size};
+use exports::example::host::game_api::{Guest, GuestGameInstance, KeyboardInfo, MouseInfo};
+
+use example::host::host_api::GameScreen;
+
 use serde::{Deserialize, Serialize};
 
 struct GameGuest;
@@ -41,88 +42,91 @@ impl Instance {
         *self.state.borrow_mut() = bincode::deserialize(&data).expect("Unable to restore state");
     }
 
-    pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
+    pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
         if mouse.left.pressed {
             let mut state = self.state.borrow_mut();
             state.count += 1;
         }
 
-        vec![
-            RenderCommand::Text(TextCommand {
-                text: "Hot Reloading with Rust!".to_string(),
-                position: Position { x: 40.0, y: 80.0 },
-                size: 40.0,
-                color: GameColor {
-                    r: 0.0,
-                    g: 1.0,
-                    b: 1.0,
-                    a: 1.0,
-                },
+        screen.draw_text(
+            "Hot Reloading with Rust!",
+            Position { x: 40.0, y: 80.0 },
+            40.0,
+            GameColor {
+                r: 0.0,
+                g: 1.0,
+                b: 1.0,
+                a: 1.0,
+            },
+        );
+        screen.draw_image(
+            "resources/rustacean-flat-happy.png",
+            Position { x: 500.0, y: 25.0 },
+            Some(Size {
+                width: 150.0,
+                height: 90.0,
             }),
-            RenderCommand::Image(ImageCommand {
-                filename: "resources/rustacean-flat-happy.png".to_string(),
-                position: Position { x: 500.0, y: 25.0 },
-                size: Some(Size {
-                    width: 150.0,
-                    height: 90.0,
-                }),
-            }),
-            RenderCommand::Text(TextCommand {
-                text: format!("Count: {}", self.state.borrow().count),
-                position: Position { x: 40.0, y: 120.0 },
-                size: 20.0,
-                color: GameColor {
-                    r: 0.0,
-                    g: 1.0,
-                    b: 1.0,
-                    a: 1.0,
-                },
-            }),
-            RenderCommand::Text(TextCommand {
-                text: format!("Key Down: ({:?})", key.down),
-                position: Position { x: 40.0, y: 160.0 },
-                size: 20.0,
-                color: GameColor {
-                    r: 0.0,
-                    g: 1.0,
-                    b: 1.0,
-                    a: 1.0,
-                },
-            }),
-            RenderCommand::Text(TextCommand {
-                text: format!("Mouse: ({}, {})", mouse.position.x, mouse.position.y),
-                position: Position { x: 40.0, y: 185.0 },
-                size: 20.0,
-                color: GameColor {
-                    r: 0.0,
-                    g: 1.0,
-                    b: 1.0,
-                    a: 1.0,
-                },
-            }),
-            RenderCommand::Line(DrawLineCommand {
-                first: Position { x: 625.0, y: 125.0 },
-                second: Position { x: 675.0, y: 200.0 },
-                thickness: 4.0,
-                color: GameColor {
-                    r: 1.0,
-                    g: 0.0,
-                    b: 0.0,
-                    a: 1.0,
-                },
-            }),
-            RenderCommand::Line(DrawLineCommand {
-                first: Position { x: 700.0, y: 125.0 },
-                second: Position { x: 700.0, y: 200.0 },
-                thickness: 4.0,
-                color: GameColor {
-                    r: 0.0,
-                    g: 0.0,
-                    b: 1.0,
-                    a: 1.0,
-                },
-            }),
-        ]
+        );
+
+        screen.draw_text(
+            &format!("Count: {}", self.state.borrow().count),
+            Position { x: 40.0, y: 120.0 },
+            20.0,
+            GameColor {
+                r: 0.0,
+                g: 1.0,
+                b: 1.0,
+                a: 1.0,
+            },
+        );
+
+        screen.draw_text(
+            &format!("Key Down: ({:?})", key.down),
+            Position { x: 40.0, y: 160.0 },
+            20.0,
+            GameColor {
+                r: 0.0,
+                g: 1.0,
+                b: 1.0,
+                a: 1.0,
+            },
+        );
+
+        screen.draw_text(
+            &format!("Mouse: ({}, {})", mouse.position.x, mouse.position.y),
+            Position { x: 40.0, y: 185.0 },
+            20.0,
+            GameColor {
+                r: 0.0,
+                g: 1.0,
+                b: 1.0,
+                a: 1.0,
+            },
+        );
+
+        screen.draw_line(
+            Position { x: 625.0, y: 125.0 },
+            Position { x: 675.0, y: 200.0 },
+            4.0,
+            GameColor {
+                r: 1.0,
+                g: 0.0,
+                b: 0.0,
+                a: 1.0,
+            },
+        );
+
+        screen.draw_line(
+            Position { x: 700.0, y: 125.0 },
+            Position { x: 700.0, y: 200.0 },
+            4.0,
+            GameColor {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 1.0,
+            },
+        );
     }
 }
 
@@ -139,8 +143,8 @@ impl GuestGameInstance for Instance {
         Instance::restore(self, data)
     }
 
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
-        Instance::run_frame(self, mouse, key)
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
+        Instance::run_frame(self, mouse, key, screen);
     }
 }
 

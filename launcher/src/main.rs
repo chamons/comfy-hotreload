@@ -14,26 +14,27 @@ mod hotreload;
 
 #[cfg(feature = "hotreload")]
 use crate::hotreload::binding::{
-    exports::example::host::game_api::{KeyboardInfo, MouseInfo, RenderCommand},
+    example::host::host_api::GameScreen,
+    example::host::types::{KeyboardInfo, MouseInfo},
     WebAssemblyContext, WebAssemblyInstance,
 };
 
 #[cfg(not(feature = "hotreload"))]
 pub use game::{
-    exports::example::host::game_api::{KeyboardInfo, MouseInfo, RenderCommand},
+    exports::example::host::game_api::{GameScreen, KeyboardInfo, MouseInfo},
     Instance,
 };
 
 use texture_cache::TextureCache;
 
 pub trait RunnableGameInstance {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand>;
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen);
 }
 
 #[cfg(not(feature = "hotreload"))]
 impl RunnableGameInstance for Instance {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
-        Instance::run_frame(self, mouse, key)
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
+        Instance::run_frame(self, mouse, key, screen)
     }
 }
 
@@ -44,15 +45,9 @@ async fn run_frame<R: RunnableGameInstance>(
 ) {
     let mouse = get_mouse_state();
     let key = get_key_info();
+    let screen = todo!();
 
-    let commands = instance.run_frame(mouse, key);
-    for command in commands {
-        match command {
-            RenderCommand::Text(text) => handle_text_command(text, font),
-            RenderCommand::Image(image) => handle_image_command(image, texture_cache).await,
-            RenderCommand::Line(line) => handle_draw_line(line),
-        }
-    }
+    instance.run_frame(mouse, key, screen);
 
     next_frame().await
 }

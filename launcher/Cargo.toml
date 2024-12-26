@@ -7,11 +7,7 @@ edition = "2021"
 anyhow = "1.0.86"
 macroquad = "0.4"
 
-# Unfortuntely features can not remove a dependency.
-# We could look at two inverse feature flags now that
-# we have simplified the crate hierarchy
-# This is a bit of a footgun :(
-game = { path = "../game" }
+game = { path = "../game", optional = true }
 
 wasmtime = { version = "21.0.1", features = [
     "component-model",
@@ -21,9 +17,11 @@ notify-debouncer-full = { version = "0.3.1", optional = true }
 notify = { version = "6.1.1", optional = true }
 
 [features]
+default = ["hotreload"]
 hotreload = [
     "dep:wasmtime",
     "dep:wasmtime-wasi",
     "dep:notify-debouncer-full",
     "dep:notify",
 ]
+direct = ["dep:game"]

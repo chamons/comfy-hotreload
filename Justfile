@@ -9,4 +9,4 @@ run:
     cargo run -p launcher
 
 hotreload:
-    cargo run -p launcher -F hotreload
+    cargo run -p launcher --no-default-features -F hotreload 

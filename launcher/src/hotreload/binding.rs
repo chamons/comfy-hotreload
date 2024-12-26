@@ -6,10 +6,10 @@ use wasmtime::component::{Component, Linker, ResourceAny};
 use wasmtime::{Config, Engine, Store};
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
-use exports::example::host::game_api::{GuestGameInstance, KeyboardInfo, MouseInfo, RenderCommand};
+use exports::example::host::game_api::{GameScreen, GuestGameInstance, KeyboardInfo, MouseInfo};
 
 wasmtime::component::bindgen!({
-    path: "../wit"
+    path: "../wit",
 });
 
 use super::wasm_path;
@@ -97,11 +97,16 @@ pub struct GameInstance<'a> {
 }
 
 impl<'a> GameInstance<'a> {
-    pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Result<Vec<RenderCommand>> {
+    pub fn run_frame(
+        &self,
+        mouse: MouseInfo,
+        key: KeyboardInfo,
+        screen: &GameScreen,
+    ) -> Result<()> {
         let mut context = self.context.borrow_mut();
 
         self.instance_type
-            .call_run_frame(&mut context.store, self.instance, mouse, &key)
+            .call_run_frame(&mut context.store, self.instance, mouse, &key, screen)
     }
 
     pub fn save(&self) -> Result<Vec<u8>> {
@@ -120,13 +125,9 @@ impl<'a> GameInstance<'a> {
 }
 
 impl<'a> crate::RunnableGameInstance for GameInstance<'a> {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
-        match GameInstance::run_frame(self, mouse, key) {
-            Ok(commands) => commands,
-            Err(err) => {
-                println!("Error running frame: {err:?}");
-                vec![]
-            }
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
+        if let Err(e) = GameInstance::run_frame(self, mouse, key, screen) {
+            println!("Error running frame: {e:?}");
         }
     }
 }
