@@ -30,7 +30,7 @@ With `hotreload` however the Launcher loads up a web assembly packaged version o
 
 ## How does the host launcher communicate with the game?
 
-There is a WebAssembly Component Interface file (`wit/interface.wit`) which contains a simple stateless interface to a portion of macroquad. Each frame is passed the state of the mouse and keyboard and returns a vector of draw instructions. These instructions are then executed within the launcher host.
+There is a WebAssembly Component Interface file (`wit/interface.wit`) which contains a simple stateless interface to a portion of macroquad. Each frame is passed the state of the mouse and keyboard and calls draw instructions on an imported screen resources. These instructions are then executed within the launcher host.
 
 As we want to arbitrarily reload the game, the global state of the graphics stack and window must not be lost. This is why the Game does not directly use macroquad.
 
