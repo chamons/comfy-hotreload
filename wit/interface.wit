@@ -1,6 +1,6 @@
 package example:host;
 
-interface game-api {
+interface types {
   enum key {
     space,
     apostrophe,
@@ -125,49 +125,6 @@ interface game-api {
     unknown,
   }
 
-  record game-color {
-    r: f32,
-    g: f32,
-    b: f32,
-    a: f32
-  }
-
-  record position {
-    x: f32,
-    y: f32
-  }
-
-  record size {
-    width: f32,
-    height: f32
-  }
-
-  record text-command {
-    text: string,
-    position: position,
-    size: f32,
-    color: game-color
-  }
-
-  record image-command {
-    filename: string,
-    position: position,
-    size: option<size>
-  }
-
-  record draw-line-command {
-    first: position,
-    second: position,
-    thickness: f32,
-    color: game-color
-  }
-
-  variant render-command {
-    text(text-command),
-    image(image-command),
-    line(draw-line-command)
-  }
-
   record click-info {
     pressed: bool,
     released: bool,
@@ -187,15 +144,48 @@ interface game-api {
     down: list<key>
   }
 
+  record game-color {
+    r: f32,
+    g: f32,
+    b: f32,
+    a: f32
+  }
+
+  record position {
+    x: f32,
+    y: f32
+  }
+
+  record size {
+    width: f32,
+    height: f32
+  }
+}
+
+interface host-api {
+  use types.{game-color, position, size };
+
+  resource game-screen {
+    draw-text: func(text: string, position: position, size: f32, color: game-color);
+    draw-image: func(filename: string, position: position, size: option<size>);
+    draw-line: func(first: position, second: position, thickness: f32, color: game-color);
+  }
+}
+
+interface game-api { 
+  use types.{mouse-info, keyboard-info};
+  use host-api.{game-screen};
+
   resource game-instance {
     constructor();
 
-    run-frame: func(mouse: mouse-info, key: keyboard-info) -> list<render-command>;
+    run-frame: func(mouse: mouse-info, key: keyboard-info, screen: borrow<game-screen>);
     save: func() -> list<u8>;
     restore: func(data: list<u8>);
   }
 }
 
 world hotreload-example {
+  import host-api;
   export game-api;
 }

@@ -1,18 +1,24 @@
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 
-use wasmtime::component::{Component, Linker, ResourceAny};
+use example::host::types::{GameColor, Position, Size};
+use wasmtime::component::{Component, Linker, Resource, ResourceAny};
 use wasmtime::{Config, Engine, Store};
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
-use exports::example::host::game_api::{GuestGameInstance, KeyboardInfo, MouseInfo, RenderCommand};
-
-wasmtime::component::bindgen!({
-    path: "../wit"
-});
+use exports::example::host::game_api::{GuestGameInstance, KeyboardInfo, MouseInfo};
 
 use super::wasm_path;
+pub use crate::GameScreen;
+
+wasmtime::component::bindgen!({
+    path: "../wit",
+    with: {
+        "example:host/host-api/game-screen": GameScreen,
+    },
+    trappable_imports: true,
+});
 
 pub struct MyState {
     pub ctx: WasiCtx,
@@ -25,6 +31,68 @@ impl WasiView for MyState {
     }
     fn table(&mut self) -> &mut ResourceTable {
         &mut self.table
+    }
+}
+
+impl MyState {
+    pub fn convert_to_resource<T>(&mut self, item: T) -> wasmtime::Result<Resource<T>>
+    where
+        T: Send + 'static,
+    {
+        let id = self.table.push(item)?;
+        Ok(id)
+    }
+}
+
+impl example::host::host_api::Host for MyState {}
+impl example::host::types::Host for MyState {}
+
+impl example::host::host_api::HostGameScreen for MyState {
+    fn draw_text(
+        &mut self,
+        screen: Resource<GameScreen>,
+        text: String,
+        position: Position,
+        size: f32,
+        color: GameColor,
+    ) -> wasmtime::Result<()> {
+        debug_assert!(!screen.owned());
+        let screen = self.table.get(&screen)?;
+        screen.draw_text(&text, position, size, color);
+        Ok(())
+    }
+
+    fn draw_image(
+        &mut self,
+        screen: Resource<GameScreen>,
+        filename: String,
+        position: Position,
+        size: Option<Size>,
+    ) -> wasmtime::Result<()> {
+        debug_assert!(!screen.owned());
+        let screen = self.table.get(&screen)?;
+        screen.draw_image(&filename, position, size);
+        Ok(())
+    }
+
+    fn draw_line(
+        &mut self,
+        screen: Resource<GameScreen>,
+        first: Position,
+        second: Position,
+        thickness: f32,
+        color: GameColor,
+    ) -> wasmtime::Result<()> {
+        debug_assert!(!screen.owned());
+        let screen = self.table.get(&screen)?;
+        screen.draw_line(first, second, thickness, color);
+        Ok(())
+    }
+
+    fn drop(&mut self, screen: Resource<GameScreen>) -> wasmtime::Result<()> {
+        debug_assert!(screen.owned());
+        self.table.delete(screen)?;
+        Ok(())
     }
 }
 
@@ -55,7 +123,7 @@ impl WebAssemblyContext {
 
 pub struct WebAssemblyInstance {
     bindings: HotreloadExample,
-    context: Rc<RefCell<WebAssemblyContext>>,
+    context: Arc<Mutex<WebAssemblyContext>>,
 }
 
 impl WebAssemblyInstance {
@@ -65,12 +133,13 @@ impl WebAssemblyInstance {
         let component = Component::from_file(&context.engine, wasm_path)?;
 
         let mut linker = Linker::new(&context.engine);
+        HotreloadExample::add_to_linker(&mut linker, |state: &mut MyState| state)?;
         wasmtime_wasi::add_to_linker_sync(&mut linker)?;
 
         let (bindings, _) = HotreloadExample::instantiate(&mut context.store, &component, &linker)?;
         Ok(Self {
             bindings,
-            context: Rc::new(RefCell::new(context)),
+            context: Arc::new(Mutex::new(context)),
         })
     }
 
@@ -78,7 +147,7 @@ impl WebAssemblyInstance {
         let instance_type = self.bindings.example_host_game_api().game_instance();
 
         let instance = {
-            let mut context = self.context.borrow_mut();
+            let mut context = self.context.lock().unwrap();
             instance_type.call_constructor(&mut context.store)?
         };
 
@@ -93,40 +162,38 @@ impl WebAssemblyInstance {
 pub struct GameInstance<'a> {
     instance_type: GuestGameInstance<'a>,
     instance: ResourceAny,
-    context: Rc<RefCell<WebAssemblyContext>>,
+    context: Arc<Mutex<WebAssemblyContext>>,
 }
 
-impl<'a> GameInstance<'a> {
-    pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Result<Vec<RenderCommand>> {
-        let mut context = self.context.borrow_mut();
+impl GameInstance<'_> {
+    pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) -> Result<()> {
+        let mut context = self.context.lock().unwrap();
+        let screen = context.store.data_mut().convert_to_resource(screen)?;
 
         self.instance_type
-            .call_run_frame(&mut context.store, self.instance, mouse, &key)
+            .call_run_frame(&mut context.store, self.instance, mouse, &key, screen)
     }
 
     pub fn save(&self) -> Result<Vec<u8>> {
-        let mut context = self.context.borrow_mut();
+        let mut context = self.context.lock().unwrap();
 
         self.instance_type
             .call_save(&mut context.store, self.instance)
     }
 
     pub fn load(&self, data: Vec<u8>) -> Result<()> {
-        let mut context = self.context.borrow_mut();
+        let mut context = self.context.lock().unwrap();
 
         self.instance_type
             .call_restore(&mut context.store, self.instance, &data)
     }
 }
 
-impl<'a> crate::RunnableGameInstance for GameInstance<'a> {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo) -> Vec<RenderCommand> {
-        match GameInstance::run_frame(self, mouse, key) {
-            Ok(commands) => commands,
-            Err(err) => {
-                println!("Error running frame: {err:?}");
-                vec![]
-            }
+#[async_trait::async_trait]
+impl crate::RunnableGameInstance for GameInstance<'_> {
+    async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
+        if let Err(e) = GameInstance::run_frame(self, mouse, key, screen) {
+            println!("Error running frame: {e:?}");
         }
     }
 }
