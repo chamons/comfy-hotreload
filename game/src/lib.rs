@@ -3,34 +3,24 @@ wit_bindgen::generate!({
     path: "../wit",
 });
 
+#[cfg(feature = "hotreload")]
+mod hotreload;
+#[cfg(feature = "hotreload")]
+use hotreload::{GameGuest, GameScreen};
+#[cfg(feature = "hotreload")]
+export!(GameGuest);
+
+#[cfg(not(feature = "hotreload"))]
+mod direct;
+#[cfg(not(feature = "hotreload"))]
+use direct::GameScreen;
+
 use std::sync::{Arc, Mutex};
 
-use async_trait::async_trait;
 use example::host::host_api::{GameColor, Position, Size};
 use exports::example::host::game_api::{KeyboardInfo, MouseInfo};
 
-#[cfg(feature = "hotreload")]
-use example::host::host_api::{GameScreen, Guest, GuestGameInstance};
-
-#[cfg(not(feature = "hotreload"))]
-#[async_trait]
-pub trait GameScreenInterface: Send + Sync {
-    fn draw_text(&self, text: &str, position: Position, size: f32, color: GameColor);
-    fn draw_line(&self, first: Position, second: Position, thickness: f32, color: GameColor);
-    fn draw_image(&self, filename: &str, position: Position, size: Option<Size>);
-}
-#[cfg(not(feature = "hotreload"))]
-type GameScreen = dyn GameScreenInterface;
-
 use serde::{Deserialize, Serialize};
-
-#[cfg(feature = "hotreload")]
-struct GameGuest;
-
-#[cfg(feature = "hotreload")]
-impl Guest for GameGuest {
-    type GameInstance = Instance;
-}
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 struct GameState {
@@ -149,25 +139,3 @@ impl Instance {
         );
     }
 }
-
-#[cfg(feature = "hotreload")]
-impl GuestGameInstance for Instance {
-    fn new() -> Instance {
-        Instance::new()
-    }
-
-    fn save(&self) -> Vec<u8> {
-        Instance::save(self)
-    }
-
-    fn restore(&self, data: Vec<u8>) {
-        Instance::restore(self, data)
-    }
-
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
-        Instance::run_frame(self, mouse, key, screen);
-    }
-}
-
-#[cfg(feature = "hotreload")]
-export!(GameGuest);
