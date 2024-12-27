@@ -45,7 +45,7 @@ impl GameScreen {
 
     pub fn draw_text(&self, text: &str, position: Position, size: f32, color: GameColor) {
         draw_text_ex(
-            &text,
+            text,
             position.x,
             position.y,
             TextParams {

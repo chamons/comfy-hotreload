@@ -162,7 +162,7 @@ pub struct GameInstance<'a> {
     context: Arc<Mutex<WebAssemblyContext>>,
 }
 
-impl<'a> GameInstance<'a> {
+impl GameInstance<'_> {
     pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) -> Result<()> {
         let mut context = self.context.lock().unwrap();
         let screen = context.store.data_mut().new(screen)?;
@@ -187,7 +187,7 @@ impl<'a> GameInstance<'a> {
 }
 
 #[async_trait::async_trait]
-impl<'a> crate::RunnableGameInstance for GameInstance<'a> {
+impl crate::RunnableGameInstance for GameInstance<'_> {
     async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
         if let Err(e) = GameInstance::run_frame(self, mouse, key, screen) {
             println!("Error running frame: {e:?}");
