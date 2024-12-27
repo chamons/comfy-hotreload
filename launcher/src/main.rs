@@ -83,7 +83,7 @@ async fn run(font: Font, texture_cache: TextureCache) -> Result<()> {
     }
 }
 
-#[macroquad::main("BasicShapes")]
+#[macroquad::main("Rust Hotreload Example")]
 async fn main() -> Result<()> {
     let font = load_ttf_font_from_bytes(include_bytes!("../../resources/Kreon-Regular.ttf"))
         .expect("Unable to load font");
