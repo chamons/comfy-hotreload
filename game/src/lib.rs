@@ -14,10 +14,10 @@ use example::host::host_api::GameScreen;
 
 #[cfg(not(feature = "hotreload"))]
 #[async_trait]
-pub trait GameScreenInterface {
+pub trait GameScreenInterface: Send + Sync {
     fn draw_text(&self, text: &str, position: Position, size: f32, color: GameColor);
     fn draw_line(&self, first: Position, second: Position, thickness: f32, color: GameColor);
-    async fn draw_image(&self, filename: &str, position: Position, size: Option<Size>);
+    fn draw_image(&self, filename: &str, position: Position, size: Option<Size>);
 }
 #[cfg(not(feature = "hotreload"))]
 type GameScreen = dyn GameScreenInterface;
@@ -56,7 +56,7 @@ impl Instance {
         *self.state.lock().unwrap() = bincode::deserialize(&data).expect("Unable to restore state");
     }
 
-    pub async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
+    pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
         if mouse.left.pressed {
             let mut state = self.state.lock().unwrap();
             state.count += 1;
@@ -73,16 +73,14 @@ impl Instance {
                 a: 1.0,
             },
         );
-        screen
-            .draw_image(
-                "resources/rustacean-flat-happy.png",
-                Position { x: 500.0, y: 25.0 },
-                Some(Size {
-                    width: 150.0,
-                    height: 90.0,
-                }),
-            )
-            .await;
+        screen.draw_image(
+            "resources/rustacean-flat-happy.png",
+            Position { x: 500.0, y: 25.0 },
+            Some(Size {
+                width: 150.0,
+                height: 90.0,
+            }),
+        );
 
         screen.draw_text(
             &format!("Count: {}", self.state.lock().unwrap().count),
@@ -139,7 +137,7 @@ impl Instance {
             GameColor {
                 r: 0.0,
                 g: 0.0,
-                b: 0.0,
+                b: 1.0,
                 a: 1.0,
             },
         );

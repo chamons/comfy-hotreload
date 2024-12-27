@@ -28,7 +28,7 @@ pub use game::{
 use texture_cache::TextureCache;
 
 #[async_trait]
-pub trait RunnableGameInstance {
+pub trait RunnableGameInstance: Send + Sync {
     async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen);
 }
 
@@ -43,7 +43,9 @@ impl RunnableGameInstance for Instance {
 async fn run_frame<R: RunnableGameInstance>(instance: &R, screen: GameScreen) {
     let mouse = get_mouse_state();
     let key = get_key_info();
-    instance.run_frame(mouse, key, screen);
+    instance.run_frame(mouse, key, screen.clone()).await;
+
+    screen.flush_image_draws().await;
 
     next_frame().await
 }

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 
@@ -55,6 +55,7 @@ impl example::host::host_api::HostGameScreen for MyState {
     ) -> wasmtime::Result<()> {
         debug_assert!(!screen.owned());
         let screen = self.table.get(&screen)?;
+        screen.draw_text(&text, position, size, color);
         Ok(())
     }
 
@@ -67,6 +68,7 @@ impl example::host::host_api::HostGameScreen for MyState {
     ) -> wasmtime::Result<()> {
         debug_assert!(!screen.owned());
         let screen = self.table.get(&screen)?;
+        screen.draw_image(&filename, position, size);
         Ok(())
     }
 
@@ -80,6 +82,7 @@ impl example::host::host_api::HostGameScreen for MyState {
     ) -> wasmtime::Result<()> {
         debug_assert!(!screen.owned());
         let screen = self.table.get(&screen)?;
+        screen.draw_line(first, second, thickness, color);
         Ok(())
     }
 
@@ -117,7 +120,7 @@ impl WebAssemblyContext {
 
 pub struct WebAssemblyInstance {
     bindings: HotreloadExample,
-    context: Rc<RefCell<WebAssemblyContext>>,
+    context: Arc<Mutex<WebAssemblyContext>>,
 }
 
 impl WebAssemblyInstance {
@@ -133,7 +136,7 @@ impl WebAssemblyInstance {
         let (bindings, _) = HotreloadExample::instantiate(&mut context.store, &component, &linker)?;
         Ok(Self {
             bindings,
-            context: Rc::new(RefCell::new(context)),
+            context: Arc::new(Mutex::new(context)),
         })
     }
 
@@ -141,7 +144,7 @@ impl WebAssemblyInstance {
         let instance_type = self.bindings.example_host_game_api().game_instance();
 
         let instance = {
-            let mut context = self.context.borrow_mut();
+            let mut context = self.context.lock().unwrap();
             instance_type.call_constructor(&mut context.store)?
         };
 
@@ -156,12 +159,12 @@ impl WebAssemblyInstance {
 pub struct GameInstance<'a> {
     instance_type: GuestGameInstance<'a>,
     instance: ResourceAny,
-    context: Rc<RefCell<WebAssemblyContext>>,
+    context: Arc<Mutex<WebAssemblyContext>>,
 }
 
 impl<'a> GameInstance<'a> {
     pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) -> Result<()> {
-        let mut context = self.context.borrow_mut();
+        let mut context = self.context.lock().unwrap();
         let screen = context.store.data_mut().new(screen)?;
 
         self.instance_type
@@ -169,22 +172,23 @@ impl<'a> GameInstance<'a> {
     }
 
     pub fn save(&self) -> Result<Vec<u8>> {
-        let mut context = self.context.borrow_mut();
+        let mut context = self.context.lock().unwrap();
 
         self.instance_type
             .call_save(&mut context.store, self.instance)
     }
 
     pub fn load(&self, data: Vec<u8>) -> Result<()> {
-        let mut context = self.context.borrow_mut();
+        let mut context = self.context.lock().unwrap();
 
         self.instance_type
             .call_restore(&mut context.store, self.instance, &data)
     }
 }
 
+#[async_trait::async_trait]
 impl<'a> crate::RunnableGameInstance for GameInstance<'a> {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
+    async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
         if let Err(e) = GameInstance::run_frame(self, mouse, key, screen) {
             println!("Error running frame: {e:?}");
         }
