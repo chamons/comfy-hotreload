@@ -112,14 +112,14 @@ impl GameScreen {
 }
 
 #[cfg(not(feature = "hotreload"))]
-#[async_trait]
+#[async_trait::async_trait]
 impl game::GameScreenInterface for GameScreen {
     fn draw_text(&self, text: &str, position: Position, size: f32, color: GameColor) {
         self.draw_text(text, position, size, color);
     }
 
-    async fn draw_image(&self, filename: &str, position: Position, size: Option<Size>) {
-        self.draw_image(filename, position, size).await;
+    fn draw_image(&self, filename: &str, position: Position, size: Option<Size>) {
+        self.draw_image(filename, position, size);
     }
 
     fn draw_line(&self, first: Position, second: Position, thickness: f32, color: GameColor) {

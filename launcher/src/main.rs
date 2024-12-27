@@ -29,21 +29,21 @@ use texture_cache::TextureCache;
 
 #[async_trait]
 pub trait RunnableGameInstance: Send + Sync {
-    async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen);
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen);
 }
 
 #[cfg(not(feature = "hotreload"))]
 #[async_trait]
 impl RunnableGameInstance for Instance {
-    async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
-        Instance::run_frame(self, mouse, key, &screen).await
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
+        Instance::run_frame(self, mouse, key, &screen)
     }
 }
 
 async fn run_frame<R: RunnableGameInstance>(instance: &R, screen: GameScreen) {
     let mouse = get_mouse_state();
     let key = get_key_info();
-    instance.run_frame(mouse, key, screen.clone()).await;
+    instance.run_frame(mouse, key, screen.clone());
 
     screen.flush_image_draws().await;
 

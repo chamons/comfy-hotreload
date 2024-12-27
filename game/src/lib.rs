@@ -14,6 +14,8 @@ export!(GameGuest);
 mod direct;
 #[cfg(not(feature = "hotreload"))]
 use direct::GameScreen;
+#[cfg(not(feature = "hotreload"))]
+pub use direct::GameScreenInterface;
 
 use std::sync::{Arc, Mutex};
 
