@@ -7,10 +7,10 @@ use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use example::host::host_api::{GameColor, Position, Size};
-use exports::example::host::game_api::{Guest, GuestGameInstance, KeyboardInfo, MouseInfo};
+use exports::example::host::game_api::{KeyboardInfo, MouseInfo};
 
 #[cfg(feature = "hotreload")]
-use example::host::host_api::GameScreen;
+use example::host::host_api::{GameScreen, Guest, GuestGameInstance};
 
 #[cfg(not(feature = "hotreload"))]
 #[async_trait]
