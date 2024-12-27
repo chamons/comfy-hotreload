@@ -17,6 +17,9 @@ use direct::GameScreen;
 #[cfg(not(feature = "hotreload"))]
 pub use direct::GameScreenInterface;
 
+mod colors;
+pub use colors::*;
+
 use std::sync::{Arc, Mutex};
 
 use example::host::host_api::{GameColor, Position, Size};
@@ -64,12 +67,7 @@ impl Instance {
             "Hot Reloading with Rust!",
             Position { x: 40.0, y: 80.0 },
             40.0,
-            GameColor {
-                r: 0.0,
-                g: 1.0,
-                b: 1.0,
-                a: 1.0,
-            },
+            AQUA,
         );
         screen.draw_image(
             "resources/rustacean-flat-happy.png",
@@ -84,60 +82,35 @@ impl Instance {
             &format!("Count: {}", self.state.lock().unwrap().count),
             Position { x: 40.0, y: 120.0 },
             20.0,
-            GameColor {
-                r: 0.0,
-                g: 1.0,
-                b: 1.0,
-                a: 1.0,
-            },
+            WHITE,
         );
 
         screen.draw_text(
             &format!("Key Down: ({:?})", key.down),
             Position { x: 40.0, y: 160.0 },
             20.0,
-            GameColor {
-                r: 0.0,
-                g: 1.0,
-                b: 1.0,
-                a: 1.0,
-            },
+            WHITE,
         );
 
         screen.draw_text(
             &format!("Mouse: ({}, {})", mouse.position.x, mouse.position.y),
             Position { x: 40.0, y: 185.0 },
             20.0,
-            GameColor {
-                r: 0.0,
-                g: 1.0,
-                b: 1.0,
-                a: 1.0,
-            },
+            WHITE,
         );
 
         screen.draw_line(
             Position { x: 625.0, y: 125.0 },
             Position { x: 675.0, y: 200.0 },
             4.0,
-            GameColor {
-                r: 1.0,
-                g: 0.0,
-                b: 0.0,
-                a: 1.0,
-            },
+            RED,
         );
 
         screen.draw_line(
             Position { x: 700.0, y: 125.0 },
             Position { x: 700.0, y: 200.0 },
             4.0,
-            GameColor {
-                r: 0.0,
-                g: 0.0,
-                b: 1.0,
-                a: 1.0,
-            },
+            BLUE,
         );
     }
 }
