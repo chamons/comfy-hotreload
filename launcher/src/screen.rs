@@ -75,7 +75,11 @@ impl GameScreen {
     }
 
     pub async fn flush_image_draws(&self) {
-        for image in self.image_requests.lock().unwrap().drain(..) {
+        let images: Vec<ImageRenderRequest> = {
+            let mut image_requests = self.image_requests.lock().unwrap();
+            image_requests.drain(..).collect()
+        };
+        for image in images {
             // Ignore image loading errors and just skip render
             if let Some(texture) = self.fetch_texture(&image.filename).await {
                 let mut params = DrawTextureParams::default();

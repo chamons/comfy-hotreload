@@ -35,8 +35,11 @@ impl WasiView for MyState {
 }
 
 impl MyState {
-    pub fn new(&mut self, screen: GameScreen) -> wasmtime::Result<Resource<GameScreen>> {
-        let id = self.table.push(screen)?;
+    pub fn to_resource<T>(&mut self, item: T) -> wasmtime::Result<Resource<T>>
+    where
+        T: Send + 'static,
+    {
+        let id = self.table.push(item)?;
         Ok(id)
     }
 }
@@ -165,7 +168,7 @@ pub struct GameInstance<'a> {
 impl GameInstance<'_> {
     pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) -> Result<()> {
         let mut context = self.context.lock().unwrap();
-        let screen = context.store.data_mut().new(screen)?;
+        let screen = context.store.data_mut().to_resource(screen)?;
 
         self.instance_type
             .call_run_frame(&mut context.store, self.instance, mouse, &key, screen)

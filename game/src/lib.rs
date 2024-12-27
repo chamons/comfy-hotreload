@@ -41,11 +41,17 @@ pub struct Instance {
     state: Arc<Mutex<GameState>>,
 }
 
-impl Instance {
-    pub fn new() -> Instance {
-        Instance {
+impl Default for Instance {
+    fn default() -> Self {
+        Self {
             state: Arc::new(Mutex::new(GameState { count: 0 })),
         }
+    }
+}
+
+impl Instance {
+    pub fn new() -> Instance {
+        Instance::default()
     }
 
     pub fn save(&self) -> Vec<u8> {
