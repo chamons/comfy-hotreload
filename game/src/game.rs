@@ -2,8 +2,9 @@ use std::sync::{Arc, Mutex};
 
 use crate::{
     exports::example::host::game_api::{KeyboardInfo, MouseInfo},
+    infrastructure::Screen,
     ui::{ScreenExt, TextSize},
-    Screen, AQUA, BLUE, RED,
+    AQUA, BLUE, RED,
 };
 
 use serde::{Deserialize, Serialize};

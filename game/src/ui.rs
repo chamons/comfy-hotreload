@@ -1,12 +1,8 @@
 use crate::{
     example::host::types::{GameColor, Position, Size},
+    infrastructure::Screen,
     WHITE,
 };
-
-#[cfg(not(feature = "hotreload"))]
-use crate::direct::GameScreen;
-#[cfg(feature = "hotreload")]
-use crate::hotreload::GameScreen;
 
 impl From<(f32, f32)> for Position {
     fn from(value: (f32, f32)) -> Self {
@@ -48,7 +44,7 @@ pub trait ScreenExt {
     }
 }
 
-impl ScreenExt for GameScreen {
+impl ScreenExt for Screen {
     fn text(&self, text: &str, position: (f32, f32), size: TextSize, color: GameColor) {
         self.draw_text(text, (position.0, position.1).into(), size.into(), color);
     }
