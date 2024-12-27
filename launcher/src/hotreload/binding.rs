@@ -191,7 +191,7 @@ impl GameInstance<'_> {
 
 #[async_trait::async_trait]
 impl crate::RunnableGameInstance for GameInstance<'_> {
-    async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
         if let Err(e) = GameInstance::run_frame(self, mouse, key, screen) {
             println!("Error running frame: {e:?}");
         }
