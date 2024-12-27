@@ -7,6 +7,9 @@ use render::*;
 mod input;
 use input::*;
 
+mod screen;
+pub use screen::GameScreen;
+
 mod texture_cache;
 
 #[cfg(feature = "hotreload")]
@@ -14,39 +17,32 @@ mod hotreload;
 
 #[cfg(feature = "hotreload")]
 use crate::hotreload::binding::{
-    example::host::host_api::GameScreen,
     example::host::types::{KeyboardInfo, MouseInfo},
     WebAssemblyContext, WebAssemblyInstance,
 };
 
 #[cfg(not(feature = "hotreload"))]
 pub use game::{
-    exports::example::host::game_api::{GameScreen, KeyboardInfo, MouseInfo},
+    exports::example::host::game_api::{KeyboardInfo, MouseInfo},
     Instance,
 };
 
 use texture_cache::TextureCache;
 
 pub trait RunnableGameInstance {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen);
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen);
 }
 
 #[cfg(not(feature = "hotreload"))]
 impl RunnableGameInstance for Instance {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
-        Instance::run_frame(self, mouse, key, screen)
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
+        Instance::run_frame(self, mouse, key, &screen)
     }
 }
 
-async fn run_frame<R: RunnableGameInstance>(
-    instance: &R,
-    font: &Font,
-    texture_cache: &mut TextureCache,
-) {
+async fn run_frame<R: RunnableGameInstance>(instance: &R, screen: GameScreen) {
     let mouse = get_mouse_state();
     let key = get_key_info();
-    let screen = todo!();
-
     instance.run_frame(mouse, key, screen);
 
     next_frame().await
@@ -55,8 +51,9 @@ async fn run_frame<R: RunnableGameInstance>(
 #[cfg(not(feature = "hotreload"))]
 async fn run(font: Font, mut texture_cache: TextureCache) -> Result<()> {
     let instance = Instance::new();
+    let screen = GameScreen::default();
     loop {
-        run_frame(&instance, &font, &mut texture_cache).await;
+        run_frame(&instance, screen.clone()).await;
     }
 }
 
@@ -79,7 +76,9 @@ async fn run(font: Font, mut texture_cache: TextureCache) -> Result<()> {
             }
         }
 
-        run_frame(&instance, &font, &mut texture_cache).await;
+        let screen = GameScreen::default();
+
+        run_frame(&instance, screen.clone()).await;
     }
 }
 

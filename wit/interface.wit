@@ -163,7 +163,7 @@ interface types {
 }
 
 interface host-api {
-  use types.{game-color, position, size};
+  use types.{game-color, position, size };
 
   resource game-screen {
     draw-text: func(text: string, position: position, size: f32, color: game-color);

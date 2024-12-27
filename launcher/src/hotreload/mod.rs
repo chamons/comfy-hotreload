@@ -11,5 +11,3 @@ pub fn wasm_path() -> Result<PathBuf> {
     wasm_path.push("game.wasm");
     Ok(wasm_path)
 }
-
-pub struct Screen {}

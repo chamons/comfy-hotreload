@@ -2,17 +2,23 @@ use std::{cell::RefCell, rc::Rc};
 
 use anyhow::Result;
 
-use wasmtime::component::{Component, Linker, ResourceAny};
+use example::host::types::{GameColor, Position, Size};
+use wasmtime::component::{Component, Linker, Resource, ResourceAny};
 use wasmtime::{Config, Engine, Store};
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
-use exports::example::host::game_api::{GameScreen, GuestGameInstance, KeyboardInfo, MouseInfo};
+use exports::example::host::game_api::{GuestGameInstance, KeyboardInfo, MouseInfo};
+
+use super::wasm_path;
+pub use crate::GameScreen;
 
 wasmtime::component::bindgen!({
     path: "../wit",
+    with: {
+        "example:host/host-api/game-screen": GameScreen,
+    },
+    trappable_imports: true,
 });
-
-use super::wasm_path;
 
 pub struct MyState {
     pub ctx: WasiCtx,
@@ -25,6 +31,62 @@ impl WasiView for MyState {
     }
     fn table(&mut self) -> &mut ResourceTable {
         &mut self.table
+    }
+}
+
+impl MyState {
+    pub fn new(&mut self, screen: GameScreen) -> wasmtime::Result<Resource<GameScreen>> {
+        let id = self.table.push(screen)?;
+        Ok(id)
+    }
+}
+
+impl example::host::host_api::Host for MyState {}
+impl example::host::types::Host for MyState {}
+
+impl example::host::host_api::HostGameScreen for MyState {
+    fn draw_text(
+        &mut self,
+        screen: Resource<GameScreen>,
+        text: String,
+        position: Position,
+        size: f32,
+        color: GameColor,
+    ) -> wasmtime::Result<()> {
+        debug_assert!(!screen.owned());
+        let screen = self.table.get(&screen)?;
+        Ok(())
+    }
+
+    fn draw_image(
+        &mut self,
+        screen: Resource<GameScreen>,
+        filename: String,
+        position: Position,
+        size: Option<Size>,
+    ) -> wasmtime::Result<()> {
+        debug_assert!(!screen.owned());
+        let screen = self.table.get(&screen)?;
+        Ok(())
+    }
+
+    fn draw_line(
+        &mut self,
+        screen: Resource<GameScreen>,
+        first: Position,
+        second: Position,
+        thickness: f32,
+        color: GameColor,
+    ) -> wasmtime::Result<()> {
+        debug_assert!(!screen.owned());
+        let screen = self.table.get(&screen)?;
+        Ok(())
+    }
+
+    fn drop(&mut self, screen: Resource<GameScreen>) -> wasmtime::Result<()> {
+        debug_assert!(screen.owned());
+        self.table.delete(screen)?;
+        Ok(())
     }
 }
 
@@ -65,6 +127,7 @@ impl WebAssemblyInstance {
         let component = Component::from_file(&context.engine, wasm_path)?;
 
         let mut linker = Linker::new(&context.engine);
+        HotreloadExample::add_to_linker(&mut linker, |state: &mut MyState| state)?;
         wasmtime_wasi::add_to_linker_sync(&mut linker)?;
 
         let (bindings, _) = HotreloadExample::instantiate(&mut context.store, &component, &linker)?;
@@ -97,13 +160,9 @@ pub struct GameInstance<'a> {
 }
 
 impl<'a> GameInstance<'a> {
-    pub fn run_frame(
-        &self,
-        mouse: MouseInfo,
-        key: KeyboardInfo,
-        screen: &GameScreen,
-    ) -> Result<()> {
+    pub fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) -> Result<()> {
         let mut context = self.context.borrow_mut();
+        let screen = context.store.data_mut().new(screen)?;
 
         self.instance_type
             .call_run_frame(&mut context.store, self.instance, mouse, &key, screen)
@@ -125,7 +184,7 @@ impl<'a> GameInstance<'a> {
 }
 
 impl<'a> crate::RunnableGameInstance for GameInstance<'a> {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: &GameScreen) {
+    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
         if let Err(e) = GameInstance::run_frame(self, mouse, key, screen) {
             println!("Error running frame: {e:?}");
         }

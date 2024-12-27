@@ -8,12 +8,24 @@ use std::cell::RefCell;
 use example::host::host_api::{GameColor, Position, Size};
 use exports::example::host::game_api::{Guest, GuestGameInstance, KeyboardInfo, MouseInfo};
 
+#[cfg(feature = "hotreload")]
 use example::host::host_api::GameScreen;
+
+#[cfg(not(feature = "hotreload"))]
+pub trait GameScreenInterface {
+    fn draw_text(&self, text: &str, position: Position, size: f32, color: GameColor);
+    fn draw_image(&self, filename: &str, position: Position, size: Option<Size>);
+    fn draw_line(&self, first: Position, second: Position, thickness: f32, color: GameColor);
+}
+#[cfg(not(feature = "hotreload"))]
+type GameScreen = dyn GameScreenInterface;
 
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "hotreload")]
 struct GameGuest;
 
+#[cfg(feature = "hotreload")]
 impl Guest for GameGuest {
     type GameInstance = Instance;
 }
@@ -130,6 +142,7 @@ impl Instance {
     }
 }
 
+#[cfg(feature = "hotreload")]
 impl GuestGameInstance for Instance {
     fn new() -> Instance {
         Instance::new()
@@ -148,4 +161,5 @@ impl GuestGameInstance for Instance {
     }
 }
 
+#[cfg(feature = "hotreload")]
 export!(GameGuest);
