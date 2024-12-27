@@ -22,7 +22,7 @@ use crate::hotreload::binding::{
 #[cfg(not(feature = "hotreload"))]
 pub use game::{
     exports::example::host::game_api::{KeyboardInfo, MouseInfo},
-    Instance,
+    Game,
 };
 
 use texture_cache::TextureCache;
@@ -34,9 +34,9 @@ pub trait RunnableGameInstance: Send + Sync {
 
 #[cfg(not(feature = "hotreload"))]
 #[async_trait]
-impl RunnableGameInstance for Instance {
+impl RunnableGameInstance for Game {
     fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
-        Instance::run_frame(self, mouse, key, &screen)
+        Game::run_frame(self, mouse, key, &screen)
     }
 }
 
@@ -52,7 +52,7 @@ async fn run_frame<R: RunnableGameInstance>(instance: &R, screen: GameScreen) {
 
 #[cfg(not(feature = "hotreload"))]
 async fn run(font: Font, texture_cache: TextureCache) -> Result<()> {
-    let instance = Instance::new();
+    let instance = Game::new();
     let screen = GameScreen::new(font, texture_cache);
     loop {
         run_frame(&instance, screen.clone()).await;
