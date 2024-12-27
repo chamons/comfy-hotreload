@@ -20,9 +20,11 @@ pub use direct::GameScreenInterface;
 mod colors;
 pub use colors::*;
 
+mod ui;
+use ui::{ScreenExt, TextSize};
+
 use std::sync::{Arc, Mutex};
 
-use example::host::host_api::{GameColor, Position, Size};
 use exports::example::host::game_api::{KeyboardInfo, MouseInfo};
 
 use serde::{Deserialize, Serialize};
@@ -63,54 +65,31 @@ impl Instance {
             state.count += 1;
         }
 
-        screen.draw_text(
+        screen.text(
             "Hot Reloading with Rust!",
-            Position { x: 40.0, y: 80.0 },
-            40.0,
+            (40.0, 80.0),
+            TextSize::Title,
             AQUA,
         );
         screen.draw_image(
             "resources/rustacean-flat-happy.png",
-            Position { x: 500.0, y: 25.0 },
-            Some(Size {
-                width: 150.0,
-                height: 90.0,
-            }),
+            (500.0, 25.0).into(),
+            Some((150.0, 90.0).into()),
         );
 
-        screen.draw_text(
+        screen.standard_text(
             &format!("Count: {}", self.state.lock().unwrap().count),
-            Position { x: 40.0, y: 120.0 },
-            20.0,
-            WHITE,
+            (40.0, 120.0),
         );
 
-        screen.draw_text(
-            &format!("Key Down: ({:?})", key.down),
-            Position { x: 40.0, y: 160.0 },
-            20.0,
-            WHITE,
-        );
+        screen.standard_text(&format!("Key Down: ({:?})", key.down), (40.0, 160.0).into());
 
-        screen.draw_text(
+        screen.standard_text(
             &format!("Mouse: ({}, {})", mouse.position.x, mouse.position.y),
-            Position { x: 40.0, y: 185.0 },
-            20.0,
-            WHITE,
+            (40.0, 185.0).into(),
         );
 
-        screen.draw_line(
-            Position { x: 625.0, y: 125.0 },
-            Position { x: 675.0, y: 200.0 },
-            4.0,
-            RED,
-        );
-
-        screen.draw_line(
-            Position { x: 700.0, y: 125.0 },
-            Position { x: 700.0, y: 200.0 },
-            4.0,
-            BLUE,
-        );
+        screen.draw_line((625.0, 125.0).into(), (675.0, 200.0).into(), 4.0, RED);
+        screen.draw_line((700.0, 125.0).into(), (700.0, 200.0).into(), 4.0, BLUE);
     }
 }
