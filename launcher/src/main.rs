@@ -1,8 +1,6 @@
 use anyhow::Result;
+use async_trait::async_trait;
 use macroquad::prelude::*;
-
-mod render;
-use render::*;
 
 mod input;
 use input::*;
@@ -29,14 +27,16 @@ pub use game::{
 
 use texture_cache::TextureCache;
 
+#[async_trait]
 pub trait RunnableGameInstance {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen);
+    async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen);
 }
 
 #[cfg(not(feature = "hotreload"))]
+#[async_trait]
 impl RunnableGameInstance for Instance {
-    fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
-        Instance::run_frame(self, mouse, key, &screen)
+    async fn run_frame(&self, mouse: MouseInfo, key: KeyboardInfo, screen: GameScreen) {
+        Instance::run_frame(self, mouse, key, &screen).await
     }
 }
 
@@ -49,21 +49,22 @@ async fn run_frame<R: RunnableGameInstance>(instance: &R, screen: GameScreen) {
 }
 
 #[cfg(not(feature = "hotreload"))]
-async fn run(font: Font, mut texture_cache: TextureCache) -> Result<()> {
+async fn run(font: Font, texture_cache: TextureCache) -> Result<()> {
     let instance = Instance::new();
-    let screen = GameScreen::default();
+    let screen = GameScreen::new(font, texture_cache);
     loop {
         run_frame(&instance, screen.clone()).await;
     }
 }
 
 #[cfg(feature = "hotreload")]
-async fn run(font: Font, mut texture_cache: TextureCache) -> Result<()> {
+async fn run(font: Font, texture_cache: TextureCache) -> Result<()> {
     let context = WebAssemblyContext::load()?;
     let mut assembly = WebAssemblyInstance::load(context)?;
     let mut instance = assembly.create_game_instance()?;
 
     let file_watcher = crate::hotreload::watcher::FileWatcher::new(crate::hotreload::wasm_path()?)?;
+    let screen = GameScreen::new(font, texture_cache);
 
     loop {
         if file_watcher.changed() {
@@ -75,8 +76,6 @@ async fn run(font: Font, mut texture_cache: TextureCache) -> Result<()> {
                 let _ = instance.load(save_data);
             }
         }
-
-        let screen = GameScreen::default();
 
         run_frame(&instance, screen.clone()).await;
     }

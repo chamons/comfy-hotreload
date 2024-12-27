@@ -15,6 +15,8 @@ wasmtime = { version = "21.0.1", features = [
 wasmtime-wasi = { version = "21.0.1", optional = true }
 notify-debouncer-full = { version = "0.3.1", optional = true }
 notify = { version = "6.1.1", optional = true }
+async-trait = "0.1.83"
+async-mutex = "1.4.0"
 
 [features]
 default = ["direct"]
