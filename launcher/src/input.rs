@@ -1,12 +1,12 @@
 use macroquad::prelude::*;
 
 #[cfg(feature = "hotreload")]
-use crate::hotreload::binding::example::host::types::{
+use crate::hotreload::binding::example::game::types::{
     ClickInfo, Key, KeyboardInfo, MouseInfo, Position,
 };
 
 #[cfg(not(feature = "hotreload"))]
-pub use game::example::host::types::{ClickInfo, Key, KeyboardInfo, MouseInfo, Position};
+pub use game::example::game::types::{ClickInfo, Key, KeyboardInfo, MouseInfo, Position};
 
 pub fn get_key_info() -> KeyboardInfo {
     KeyboardInfo {

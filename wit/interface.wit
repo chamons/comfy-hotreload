@@ -1,4 +1,4 @@
-package example:host;
+package example:game;
 
 interface types {
   enum key {

@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::example::host::types::{GameColor, Position, Size};
+use crate::example::game::types::{GameColor, Position, Size};
 
 #[async_trait]
 pub trait GameScreenInterface: Send + Sync {

@@ -2,12 +2,12 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 
-use example::host::types::{GameColor, Position, Size};
+use example::game::types::{GameColor, Position, Size};
 use wasmtime::component::{Component, Linker, Resource, ResourceAny};
 use wasmtime::{Config, Engine, Store};
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
-use exports::example::host::game_api::{GuestGameInstance, KeyboardInfo, MouseInfo};
+use exports::example::game::game_api::{GuestGameInstance, KeyboardInfo, MouseInfo};
 
 use super::wasm_path;
 pub use crate::GameScreen;
@@ -15,7 +15,7 @@ pub use crate::GameScreen;
 wasmtime::component::bindgen!({
     path: "../wit",
     with: {
-        "example:host/host-api/game-screen": GameScreen,
+        "example:game/host-api/game-screen": GameScreen,
     },
     trappable_imports: true,
 });
@@ -44,10 +44,10 @@ impl MyState {
     }
 }
 
-impl example::host::host_api::Host for MyState {}
-impl example::host::types::Host for MyState {}
+impl example::game::host_api::Host for MyState {}
+impl example::game::types::Host for MyState {}
 
-impl example::host::host_api::HostGameScreen for MyState {
+impl example::game::host_api::HostGameScreen for MyState {
     fn draw_text(
         &mut self,
         screen: Resource<GameScreen>,
@@ -144,7 +144,7 @@ impl WebAssemblyInstance {
     }
 
     pub fn create_game_instance(&mut self) -> Result<GameInstance> {
-        let instance_type = self.bindings.example_host_game_api().game_instance();
+        let instance_type = self.bindings.example_game_game_api().game_instance();
 
         let instance = {
             let mut context = self.context.lock().unwrap();

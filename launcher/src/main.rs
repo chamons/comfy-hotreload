@@ -15,13 +15,13 @@ mod hotreload;
 
 #[cfg(feature = "hotreload")]
 use crate::hotreload::binding::{
-    example::host::types::{KeyboardInfo, MouseInfo},
+    example::game::types::{KeyboardInfo, MouseInfo},
     WebAssemblyContext, WebAssemblyInstance,
 };
 
 #[cfg(not(feature = "hotreload"))]
 pub use game::{
-    exports::example::host::game_api::{KeyboardInfo, MouseInfo},
+    exports::example::game::game_api::{KeyboardInfo, MouseInfo},
     Game,
 };
 

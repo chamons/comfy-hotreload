@@ -1,4 +1,4 @@
-use crate::example::host::types::GameColor;
+use crate::example::game::types::GameColor;
 
 pub const WHITE: GameColor = GameColor {
     r: 0.0,

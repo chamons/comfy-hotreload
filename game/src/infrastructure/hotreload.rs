@@ -1,7 +1,7 @@
-use crate::exports::example::host::game_api::{Guest, GuestGameInstance};
-use crate::exports::example::host::game_api::{KeyboardInfo, MouseInfo};
+use crate::exports::example::game::game_api::{Guest, GuestGameInstance};
+use crate::exports::example::game::game_api::{KeyboardInfo, MouseInfo};
 
-pub use crate::example::host::host_api::GameScreen;
+pub use crate::example::game::host_api::GameScreen;
 
 use crate::Game;
 

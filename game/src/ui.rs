@@ -1,5 +1,5 @@
 use crate::{
-    example::host::types::{GameColor, Position, Size},
+    example::game::types::{GameColor, Position, Size},
     infrastructure::Screen,
     WHITE,
 };
